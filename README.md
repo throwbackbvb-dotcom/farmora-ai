@@ -34,21 +34,24 @@ Aiven's free MySQL starts empty — your app already creates tables automaticall
 (`CREATE TABLE IF NOT EXISTS...`) the first time it runs, so you don't need to
 do anything manual here.
 
-## Step 3 — Put the project on GitHub
+## Step 3 — Put the project on GitHub (no command line needed)
 
 1. Go to https://github.com and create a free account if you don't have one.
-2. Click **New repository**, name it e.g. `farmora-ai`, keep it **Private** (recommended, since it'll reference your sensor setup), click **Create repository**.
-3. On your computer, open a terminal in this `farmora-deploy` folder and run:
-   ```
-   git init
-   git add .
-   git commit -m "Initial deploy setup"
-   git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/farmora-ai.git
-   git push -u origin main
-   ```
-   (Replace `YOUR_USERNAME` with your GitHub username. GitHub will prompt you to
-   log in the first time you push.)
+2. Click the **+** icon (top right) → **New repository**. Name it `farmora-ai`,
+   set it to **Private**, leave everything else default, click **Create repository**.
+3. Download **GitHub Desktop** from https://desktop.github.com and install it.
+4. Open GitHub Desktop and sign in with your GitHub account when prompted.
+5. Click **File → Clone repository**, select the `farmora-ai` repo from the
+   list, choose a location on your computer, click **Clone**.
+6. This creates an empty `farmora-ai` folder on your computer. Copy
+   **everything** from your `farmora-deploy` folder (including the `static`
+   folder, `main.py`, `requirements.txt`, `Procfile`, `.gitignore`, and your
+   `xgb_crop_model.json` / `label_encoders.joblib` / `ca.pem` files) into that
+   `farmora-ai` folder.
+7. Go back to GitHub Desktop — it will automatically list all the new files
+   under "Changes." Type a short summary like `Initial deploy setup` in the
+   box at the bottom left, then click **Commit to main**.
+8. Click **Push origin** (top toolbar) to upload everything to GitHub.
 
 ⚠️ Since `ca.pem` and your model files aren't secrets by themselves, it's fine
 to commit them — just never commit real passwords directly in code (we're
