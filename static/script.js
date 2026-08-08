@@ -384,6 +384,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
   locPills.forEach(pill => pill.addEventListener('click', openLocationModal));
 
+  /* ---------- LIVE ESP SENSOR CARDS ---------- */
+  const sensorCardsGrid = document.getElementById('sensorCardsGrid');
+
+  function renderSensorMessage(message) {
+    if (!sensorCardsGrid) return;
+    sensorCardsGrid.innerHTML = `<p class="sensor-empty-msg">${message}</p>`;
+  }
+
+  function formatReading(value, unit) {
+    return (value === null || value === undefined) ? '—' : `${value}${unit}`;
+  }
+
+  function wateringBadge(needsWatering) {
+    if (needsWatering === true) return '<span class="tag needs-water">💧 Needs Watering</span>';
+    if (needsWatering === false) return '<span class="tag optimal">✅ No Watering Needed</span>';
+    return '<span class="tag unknown-water">Awaiting data</span>';
+  }
+
+  function buildSensorCard(sensor) {
+    const reading = sensor.reading || {};
+    return `
+      <div class="panel sensor-card reveal">
+        <div class="sensor-card-head">
+          <h3>${sensor.esp_id}</h3>
+          ${wateringBadge(sensor.needs_watering)}
+        </div>
+        <div class="sensor-readings">
+          <div class="sensor-reading-item"><small>Soil Moisture</small><b>${formatReading(reading.soil_moisture, '%')}</b></div>
+          <div class="sensor-reading-item"><small>Temperature</small><b>${formatReading(reading.temperature, '\u00B0C')}</b></div>
+          <div class="sensor-reading-item"><small>Humidity</small><b>${formatReading(reading.humidity, '%')}</b></div>
+        </div>
+        <span class="sensor-last-seen">Last update: ${reading.time || sensor.last_seen || 'N/A'}</span>
+      </div>
+    `;
+  }
+
+  async function loadSensorData() {
+    if (!sensorCardsGrid) return;
+    try {
+      const res = await fetch('/api/sensors');
+      if (!res.ok) throw new Error('Request failed: ' + res.status);
+      const data = await res.json();
+      const sensors = data.sensors || [];
+
+      if (sensors.length === 0) {
+        renderSensorMessage('No ESP sensors connected yet.');
+        return;
+      }
+
+      sensorCardsGrid.innerHTML = sensors.map(buildSensorCard).join('');
+    } catch (err) {
+      console.error('Failed to load sensor data:', err);
+      renderSensorMessage('Unable to reach sensor server. Retrying\u2026');
+    }
+  }
+
+  if (sensorCardsGrid) {
+    loadSensorData();
+    setInterval(loadSensorData, 10000);
+  }
+
   /* ---------- UPGRADE TO PRO ---------- */
   const upgradeBtn = document.getElementById('upgradeBtn');
   if (upgradeBtn) upgradeBtn.addEventListener('click', () => {

@@ -15,6 +15,7 @@ soil = 'Black Soil'
 seedling_stage = 'Germination'
 
 latest_data_by_sensor = {}
+latest_prediction_by_sensor = {}
 
 SENSOR_ID_PATTERN = re.compile(r'^[A-Za-z0-9_]+$')
 
@@ -106,6 +107,46 @@ def recieve_sensor():
 
     print(payload)
     return jsonify({"status": "ok"}), 200
+
+
+@app.route('/api/sensors', methods=["GET"])
+def get_sensors():
+    """Returns the latest reading + watering recommendation for every ESP
+    that has ever reported in, so the frontend can render one box per
+    sensor without needing to know in advance how many exist."""
+    cursor = conn.cursor(buffered=True)
+    try:
+        cursor.execute('SELECT Sensor_no, last_seen FROM SENSORS ORDER BY Sensor_no;')
+        rows = cursor.fetchall()
+
+        sensors = []
+        for sensor_no, last_seen in rows:
+            cursor.execute(
+                f'SELECT TIME_STAMP, TEMPERATURE, HUMIDITY, SOIL_MOISTURE '
+                f'FROM `{sensor_no}` ORDER BY TIME_STAMP DESC LIMIT 1;'
+            )
+            row = cursor.fetchone()
+
+            reading = None
+            if row:
+                reading = {
+                    "time": row[0],
+                    "temperature": float(row[1]) if row[1] is not None else None,
+                    "humidity": float(row[2]) if row[2] is not None else None,
+                    "soil_moisture": float(row[3]) if row[3] is not None else None,
+                }
+
+            sensors.append({
+                "esp_id": sensor_no,
+                "last_seen": last_seen,
+                "reading": reading,
+                # True = needs watering, False = doesn't, None = not computed yet
+                "needs_watering": latest_prediction_by_sensor.get(sensor_no),
+            })
+
+        return jsonify({"status": "ok", "sensors": sensors}), 200
+    finally:
+        cursor.close()
 
 
 def my_scheduled_job():
@@ -211,6 +252,7 @@ def watering_prediction():
                         final_outcome = 0
                     else:
                         final_outcome = 1
+            latest_prediction_by_sensor[sensor_name] = bool(final_outcome)
             print(final_outcome)
     finally:
         cursor.close()

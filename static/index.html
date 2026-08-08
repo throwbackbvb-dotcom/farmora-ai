@@ -8,6 +8,19 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Michroma&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<style>
+  .sensor-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:16px;}
+  .sensor-empty-msg{opacity:.7;font-size:.95rem;grid-column:1/-1;text-align:center;padding:24px 0;}
+  .sensor-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+  .sensor-card-head h3{margin:0;font-size:1.05rem;}
+  .sensor-readings{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:10px;}
+  .sensor-reading-item{display:flex;flex-direction:column;gap:2px;}
+  .sensor-reading-item small{opacity:.65;font-size:.75rem;}
+  .sensor-reading-item b{font-size:1.15rem;}
+  .sensor-last-seen{display:block;font-size:.75rem;opacity:.55;}
+  .tag.needs-water{background:rgba(240,85,76,.15);color:#F0554C;}
+  .tag.unknown-water{background:rgba(255,255,255,.08);color:#9aa89f;}
+</style>
 </head>
 <body>
 
@@ -85,10 +98,6 @@
       <!-- Right: Stat stack -->
       <div class="stat-stack">
         <div class="float-card">
-          <span class="fc-icon">💧</span>
-          <div><small>Soil Moisture</small><b>62%</b><span class="tag optimal">Optimal</span></div>
-        </div>
-        <div class="float-card">
           <span class="fc-icon">⛅</span>
           <div><small>Weather</small><b>26°C</b><span class="tag">Partly Cloudy</span></div>
         </div>
@@ -126,23 +135,8 @@
       <button class="location-pill loc-pill" data-default="Malappuram, Kerala">📍 <span class="loc-text">Malappuram, Kerala</span> ▾</button>
     </div>
 
-    <div class="stat-grid">
-      <div class="stat-card reveal">
-        <div class="stat-top"><small>Soil Moisture</small><span class="stat-ico">💧</span></div>
-        <b>62%</b><span class="tag optimal">Optimal</span>
-      </div>
-      <div class="stat-card reveal">
-        <div class="stat-top"><small>Temperature</small><span class="stat-ico">🌡️</span></div>
-        <b>26°C</b><span class="tag">Normal</span>
-      </div>
-      <div class="stat-card reveal">
-        <div class="stat-top"><small>Humidity</small><span class="stat-ico">💦</span></div>
-        <b>70%</b><span class="tag">Normal</span>
-      </div>
-      <div class="stat-card reveal">
-        <div class="stat-top"><small>pH Level</small><span class="stat-ico">⚗️</span></div>
-        <b>6.4</b><span class="tag optimal">Ideal</span>
-      </div>
+    <div class="sensor-cards-grid" id="sensorCardsGrid">
+      <p class="sensor-empty-msg">Waiting for ESP sensors to report data…</p>
     </div>
 
     <div class="sensors-lower">
