@@ -41,6 +41,7 @@ connect_kwargs = dict(
     user=DB_USER,
     password=DB_PASSWORD,
     database=DB_NAME,
+    connection_timeout=10,
 )
 if DB_SSL_CA:
     connect_kwargs["ssl_ca"] = DB_SSL_CA
@@ -48,7 +49,12 @@ if DB_SSL_CA:
 
 conn = sql.connect(**connect_kwargs)
 cursor = conn.cursor()
-cursor.execute("CREATE TABLE IF NOT EXISTS SENSORS (Sensor_no varchar(50),last_seen varchar(50));")
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS SENSORS (
+        Sensor_no varchar(50) PRIMARY KEY,
+        last_seen varchar(50)
+    );
+""")
 cursor.close()
 
 # ---------------------------------------------------------------------------
@@ -90,7 +96,8 @@ def recieve_sensor():
 
         cursor.execute(
             f'CREATE TABLE IF NOT EXISTS `{current_sensor}` '
-            '(TIME_STAMP VARCHAR(50),TEMPERATURE DECIMAL(4,1),'
+            '(ID INT AUTO_INCREMENT PRIMARY KEY,'
+            'TIME_STAMP VARCHAR(50),TEMPERATURE DECIMAL(4,1),'
             'HUMIDITY DECIMAL(4,1),SOIL_MOISTURE DECIMAL(4,1))'
         )
         conn.commit()
